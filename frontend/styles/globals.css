@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 20, 20, 22;
+  --background-end-rgb: 20, 20, 22;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5546FF;
+  border-radius: 4px;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-stacks-purple text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:opacity-90 active:scale-95;
+}
+
+.btn-secondary {
+  @apply border border-white/20 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:bg-white/10;
+}
+
+/* Card styles */
+.card {
+  @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6;
+}
+
+/* Input styles */
+.input {
+  @apply w-full bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-stacks-purple transition-colors;
+}
+
+/* Loading spinner */
+.spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-stacks-purple;
+}
