@@ -54,9 +54,6 @@ export const getNetwork = () => {
 // WALLET CONNECTION
 // ==============================================================================
 
-/**
- * Connect to Leather/Hiro Wallet
- */
 export const connectWallet = (onFinish?: (userData: any) => void) => {
   showConnect({
     appDetails: {
@@ -73,24 +70,15 @@ export const connectWallet = (onFinish?: (userData: any) => void) => {
   });
 };
 
-/**
- * Disconnect wallet
- */
 export const disconnectWallet = () => {
   userSession.signUserOut();
 };
 
-/**
- * Check if user is signed in
- */
 export const isSignedIn = () => {
   if (typeof window === "undefined") return false;
   return userSession.isUserSignedIn();
 };
 
-/**
- * Get current user's STX address
- */
 export const getUserAddress = (): string | null => {
   if (!isSignedIn()) return null;
   const userData = userSession.loadUserData();
@@ -107,71 +95,81 @@ export const getUserAddress = (): string | null => {
 // ==============================================================================
 
 /**
- * Safely parse a Clarity value to a JavaScript value
+ * Recursively extract values from cvToJSON result
+ */
+const extractValue = (obj: any): any => {
+  if (obj === null || obj === undefined) return null;
+  
+  // If it has a 'value' property, extract it
+  if (typeof obj === 'object' && 'value' in obj) {
+    const type = obj.type || '';
+    
+    // Handle optional types - unwrap the inner value
+    if (type.startsWith('(optional')) {
+      if (obj.value === null) return null;
+      return extractValue(obj.value);
+    }
+    
+    // Handle tuple - extract all fields
+    if (type.startsWith('(tuple') || type === 'tuple') {
+      const result: any = {};
+      for (const [key, val] of Object.entries(obj.value as Record<string, any>)) {
+        result[key] = extractValue(val);
+      }
+      return result;
+    }
+    
+    // Handle list
+    if (type === 'list' || type.startsWith('(list')) {
+      if (Array.isArray(obj.value)) {
+        return obj.value.map((item: any) => extractValue(item));
+      }
+    }
+    
+    // Handle primitives (uint, int, bool, principal, string, buff)
+    if (type === 'uint' || type === 'int') {
+      return parseInt(obj.value, 10);
+    }
+    if (type === 'bool') {
+      return obj.value;
+    }
+    if (type === 'principal' || type.includes('string') || type.includes('buff')) {
+      return obj.value;
+    }
+    
+    // Default: return the value
+    return obj.value;
+  }
+  
+  // If it's an array, map over it
+  if (Array.isArray(obj)) {
+    return obj.map((item: any) => extractValue(item));
+  }
+  
+  // Return as-is for primitives
+  return obj;
+};
+
+/**
+ * Parse a Clarity value from contract call
  */
 const parseCV = (cv: ClarityValue): any => {
   try {
     const json = cvToJSON(cv);
-    return parseCVJSON(json);
+    console.log("cvToJSON result:", JSON.stringify(json, null, 2));
+    const extracted = extractValue(json);
+    console.log("Extracted value:", extracted);
+    return extracted;
   } catch (err) {
     console.error("Error parsing CV:", err);
     return cvToValue(cv);
   }
 };
 
-/**
- * Parse cvToJSON result recursively
- */
-const parseCVJSON = (json: any): any => {
-  if (!json) return null;
-  
-  // Handle different Clarity types
-  if (json.type === 'uint' || json.type === 'int') {
-    return parseInt(json.value, 10);
-  }
-  if (json.type === 'bool') {
-    return json.value;
-  }
-  if (json.type === 'principal') {
-    return json.value;
-  }
-  if (json.type === 'buff') {
-    return json.value;
-  }
-  if (json.type === '(string-utf8)' || json.type === 'string-utf8') {
-    return json.value;
-  }
-  if (json.type === '(string-ascii)' || json.type === 'string-ascii') {
-    return json.value;
-  }
-  if (json.type === 'list') {
-    return json.value.map((item: any) => parseCVJSON(item));
-  }
-  if (json.type === 'tuple') {
-    const result: any = {};
-    for (const [key, val] of Object.entries(json.value)) {
-      result[key] = parseCVJSON(val);
-    }
-    return result;
-  }
-  if (json.type === '(optional none)' || json.type === 'none') {
-    return null;
-  }
-  if (json.type === '(optional some)' || json.type === 'some') {
-    return parseCVJSON(json.value);
-  }
-  
-  // Fallback: return raw value
-  return json.value !== undefined ? json.value : json;
-};
-
 // ==============================================================================
 // READ-ONLY CONTRACT CALLS
 // ==============================================================================
 
-/**
- * Fetch ebook details by ID
- */
 export const getEbook = async (ebookId: number) => {
   try {
     const network = getNetwork();
@@ -185,7 +183,7 @@ export const getEbook = async (ebookId: number) => {
       senderAddress: CONTRACT_ADDRESS,
     });
     const value = parseCV(result);
-    console.log(`Ebook ${ebookId} result:`, value);
+    console.log(`Ebook ${ebookId} parsed:`, value);
     return value;
   } catch (err) {
     console.error(`Error fetching ebook ${ebookId}:`, err);
@@ -193,9 +191,6 @@ export const getEbook = async (ebookId: number) => {
   }
 };
 
-/**
- * Get total number of ebooks
- */
 export const getEbookCount = async (): Promise<number> => {
   try {
     const network = getNetwork();
@@ -217,13 +212,7 @@ export const getEbookCount = async (): Promise<number> => {
   }
 };
 
-/**
- * Check if user has access to an ebook
- */
-export const hasAccess = async (
-  buyerAddress: string,
-  ebookId: number
-): Promise<boolean> => {
+export const hasAccess = async (buyerAddress: string, ebookId: number): Promise<boolean> => {
   try {
     const network = getNetwork();
     const result = await callReadOnlyFunction({
@@ -241,9 +230,6 @@ export const hasAccess = async (
   }
 };
 
-/**
- * Get all ebooks by an author
- */
 export const getAuthorEbooks = async (authorAddress: string): Promise<number[]> => {
   try {
     const network = getNetwork();
@@ -258,8 +244,6 @@ export const getAuthorEbooks = async (authorAddress: string): Promise<number[]> 
     });
     const ids = parseCV(result);
     console.log("Author ebook IDs (parsed):", ids);
-    
-    // Ensure we return an array of numbers
     if (Array.isArray(ids)) {
       return ids.map(id => typeof id === 'number' ? id : Number(id)).filter(id => !isNaN(id));
     }
@@ -270,9 +254,6 @@ export const getAuthorEbooks = async (authorAddress: string): Promise<number[]> 
   }
 };
 
-/**
- * Get all ebooks owned by a buyer
- */
 export const getBuyerEbooks = async (buyerAddress: string): Promise<number[]> => {
   try {
     const network = getNetwork();
@@ -287,8 +268,6 @@ export const getBuyerEbooks = async (buyerAddress: string): Promise<number[]> =>
     });
     const ids = parseCV(result);
     console.log("Buyer ebook IDs (parsed):", ids);
-    
-    // Ensure we return an array of numbers
     if (Array.isArray(ids)) {
       return ids.map(id => typeof id === 'number' ? id : Number(id)).filter(id => !isNaN(id));
     }
@@ -299,13 +278,7 @@ export const getBuyerEbooks = async (buyerAddress: string): Promise<number[]> =>
   }
 };
 
-/**
- * Check if user is the author of an ebook
- */
-export const isAuthor = async (
-  ebookId: number,
-  userAddress: string
-): Promise<boolean> => {
+export const isAuthor = async (ebookId: number, userAddress: string): Promise<boolean> => {
   try {
     const network = getNetwork();
     const result = await callReadOnlyFunction({
@@ -327,9 +300,6 @@ export const isAuthor = async (
 // PUBLIC CONTRACT CALLS (TRANSACTIONS)
 // ==============================================================================
 
-/**
- * Register a new ebook
- */
 export const registerEbook = async (
   title: string,
   description: string,
@@ -352,7 +322,7 @@ export const registerEbook = async (
       bufferCV(contentHash),
       uintCV(price),
     ],
-    postConditionMode: 0x01, // Allow
+    postConditionMode: 0x01,
     onFinish: (data) => {
       console.log("Ebook registered:", data);
       onFinish?.(data);
@@ -364,9 +334,6 @@ export const registerEbook = async (
   });
 };
 
-/**
- * Purchase an ebook
- */
 export const buyEbook = async (
   ebookId: number,
   onFinish?: (data: any) => void,
@@ -380,7 +347,7 @@ export const buyEbook = async (
     contractName: CONTRACT_NAME,
     functionName: "buy-ebook",
     functionArgs: [uintCV(ebookId)],
-    postConditionMode: 0x01, // Allow
+    postConditionMode: 0x01,
     onFinish: (data) => {
       console.log("Ebook purchased:", data);
       onFinish?.(data);
@@ -392,9 +359,6 @@ export const buyEbook = async (
   });
 };
 
-/**
- * Update ebook price (author only)
- */
 export const updatePrice = async (
   ebookId: number,
   newPrice: number,
@@ -421,9 +385,6 @@ export const updatePrice = async (
   });
 };
 
-/**
- * Deactivate an ebook (author only)
- */
 export const deactivateEbook = async (
   ebookId: number,
   onFinish?: (data: any) => void,
@@ -453,26 +414,9 @@ export const deactivateEbook = async (
 // UTILITY FUNCTIONS
 // ==============================================================================
 
-/**
- * Convert STX to microSTX
- */
-export const stxToMicroStx = (stx: number): number => {
-  return Math.floor(stx * 1_000_000);
-};
-
-/**
- * Convert microSTX to STX
- */
-export const microStxToStx = (microStx: number): number => {
-  return microStx / 1_000_000;
-};
-
-/**
- * Format STX amount for display
- */
-export const formatStx = (microStx: number): string => {
-  return `${microStxToStx(microStx).toFixed(6)} STX`;
-};
+export const stxToMicroStx = (stx: number): number => Math.floor(stx * 1_000_000);
+export const microStxToStx = (microStx: number): number => microStx / 1_000_000;
+export const formatStx = (microStx: number): string => `${microStxToStx(microStx).toFixed(6)} STX`;
 
 // ==============================================================================
 // EBOOK TYPE DEFINITION
@@ -500,46 +444,10 @@ export const getAllEbooks = async (): Promise<Ebook[]> => {
     
     for (let i = 1; i <= count; i++) {
       const ebook = await getEbook(i);
-      console.log(`Ebook ${i}:`, ebook);
-      if (ebook) {
-        // Only show active ebooks on homepage
-        if (ebook.active) {
-          ebooks.push({
-            id: i,
-            title: ebook.title || "",
-            description: ebook.description || "",
-            contentHash: ebook["content-hash"] || ebook.contentHash || "",
-            price: Number(ebook.price) || 0,
-            author: ebook.author || "",
-            createdAt: Number(ebook["created-at"] || ebook.createdAt || 0),
-            active: ebook.active,
-          });
-        }
-      }
-    }
-    
-    console.log("All ebooks loaded:", ebooks);
-    return ebooks;
-  } catch (err) {
-    console.error("Error fetching all ebooks:", err);
-    return [];
-  }
-};
-
-/**
- * Fetch ebooks by author (includes inactive)
- */
-export const getEbooksByAuthor = async (authorAddress: string): Promise<Ebook[]> => {
-  try {
-    const ebookIds = await getAuthorEbooks(authorAddress);
-    console.log(`Fetching ${ebookIds.length} ebooks for author ${authorAddress}`);
-    const ebooks: Ebook[] = [];
-    
-    for (const id of ebookIds) {
-      const ebook = await getEbook(id);
-      if (ebook) {
+      console.log(`Ebook ${i} raw:`, ebook);
+      if (ebook && ebook.active) {
         ebooks.push({
-          id,
+          id: i,
           title: ebook.title || "",
           description: ebook.description || "",
           contentHash: ebook["content-hash"] || ebook.contentHash || "",
@@ -551,9 +459,10 @@ export const getEbooksByAuthor = async (authorAddress: string): Promise<Ebook[]>
       }
     }
     
+    console.log("All ebooks loaded:", ebooks);
     return ebooks;
   } catch (err) {
-    console.error("Error fetching author ebooks:", err);
+    console.error("Error fetching all ebooks:", err);
     return [];
   }
 };
