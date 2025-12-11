@@ -31,12 +31,12 @@ export default function Home() {
 
   return (
     <Layout>
-      {/* Hero Section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-white mb-4">
+      {/* Hero Section - Mobile optimized */}
+      <div className="text-center mb-8 sm:mb-12 px-2">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
           Decentralized eBook Marketplace
         </h1>
-        <p className="text-lg text-white/60 max-w-2xl mx-auto">
+        <p className="text-sm sm:text-base md:text-lg text-white/60 max-w-2xl mx-auto leading-relaxed">
           Buy and sell ebooks directly on Bitcoin L2. Authors retain full
           ownership, and all transactions are secured by the Stacks blockchain.
         </p>
@@ -44,15 +44,15 @@ export default function Home() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="flex justify-center py-12">
+        <div className="flex justify-center py-8 sm:py-12">
           <div className="spinner" />
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="text-center py-12">
-          <p className="text-red-400 mb-4">{error}</p>
+        <div className="text-center py-8 sm:py-12 px-4">
+          <p className="text-red-400 mb-4 text-sm sm:text-base">{error}</p>
           <button onClick={loadEbooks} className="btn-secondary">
             Try Again
           </button>
@@ -61,10 +61,10 @@ export default function Home() {
 
       {/* Empty State */}
       {!isLoading && !error && ebooks.length === 0 && (
-        <div className="text-center py-12">
-          <div className="w-24 h-24 mx-auto mb-6 bg-white/5 rounded-full flex items-center justify-center">
+        <div className="text-center py-8 sm:py-12 px-4">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 bg-white/5 rounded-full flex items-center justify-center">
             <svg
-              className="w-12 h-12 text-white/40"
+              className="w-10 h-10 sm:w-12 sm:h-12 text-white/40"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -77,21 +77,21 @@ export default function Home() {
               />
             </svg>
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">
+          <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
             No ebooks yet
           </h3>
-          <p className="text-white/60 mb-6">
+          <p className="text-white/60 mb-4 sm:mb-6 text-sm sm:text-base">
             Be the first to publish an ebook on the marketplace!
           </p>
-          <a href="/upload" className="btn-primary">
+          <a href="/upload" className="btn-primary inline-block">
             Publish Your eBook
           </a>
         </div>
       )}
 
-      {/* Ebook Grid */}
+      {/* Ebook Grid - Responsive */}
       {!isLoading && !error && ebooks.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {ebooks.map((ebook) => (
             <EbookCard key={ebook.id} ebook={ebook} />
           ))}

@@ -33,26 +33,76 @@ body {
   border-radius: 4px;
 }
 
-/* Button styles */
+/* Button styles - Mobile optimized */
 .btn-primary {
-  @apply bg-stacks-purple text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:opacity-90 active:scale-95;
+  @apply bg-stacks-purple text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold transition-all duration-200 hover:opacity-90 active:scale-95 text-sm sm:text-base;
 }
 
 .btn-secondary {
-  @apply border border-white/20 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:bg-white/10;
+  @apply border border-white/20 text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold transition-all duration-200 hover:bg-white/10 text-sm sm:text-base;
 }
 
-/* Card styles */
+/* Card styles - Mobile optimized */
 .card {
-  @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6;
+  @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 relative;
 }
 
-/* Input styles */
+/* Input styles - Mobile optimized */
 .input {
-  @apply w-full bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-stacks-purple transition-colors;
+  @apply w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 text-white placeholder-white/40 focus:outline-none focus:border-stacks-purple transition-colors text-sm sm:text-base;
 }
 
 /* Loading spinner */
 .spinner {
   @apply animate-spin rounded-full h-8 w-8 border-b-2 border-stacks-purple;
+}
+
+/* Mobile-first responsive container */
+.container-mobile {
+  @apply px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto;
+}
+
+/* Responsive grid for ebook cards */
+.ebook-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+}
+
+/* Mobile navigation */
+@media (max-width: 640px) {
+  .nav-links {
+    @apply flex-col gap-2;
+  }
+  
+  .hero-title {
+    @apply text-2xl;
+  }
+  
+  .hero-subtitle {
+    @apply text-sm;
+  }
+}
+
+/* Touch-friendly tap targets */
+@media (pointer: coarse) {
+  button, a, input, select, textarea {
+    min-height: 44px;
+  }
+}
+
+/* Prevent zoom on input focus (iOS) */
+@media screen and (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Safe area for notched devices */
+@supports (padding: max(0px)) {
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
 }
