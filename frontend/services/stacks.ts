@@ -20,7 +20,7 @@ import {
   bufferCV,
   principalCV,
   cvToValue,
-  fetchCallReadOnlyFunction,
+  callReadOnlyFunction,
   ClarityValue,
 } from "@stacks/transactions";
 
@@ -104,7 +104,7 @@ export const getUserAddress = (): string | null => {
 export const getEbook = async (ebookId: number) => {
   try {
     const network = getNetwork();
-    const result = await fetchCallReadOnlyFunction({
+    const result = await callReadOnlyFunction({
       contractAddress: CONTRACT_ADDRESS,
       contractName: CONTRACT_NAME,
       functionName: "get-ebook",
@@ -125,7 +125,7 @@ export const getEbook = async (ebookId: number) => {
 export const getEbookCount = async (): Promise<number> => {
   try {
     const network = getNetwork();
-    const result = await fetchCallReadOnlyFunction({
+    const result = await callReadOnlyFunction({
       contractAddress: CONTRACT_ADDRESS,
       contractName: CONTRACT_NAME,
       functionName: "get-ebook-count",
@@ -149,7 +149,7 @@ export const hasAccess = async (
 ): Promise<boolean> => {
   try {
     const network = getNetwork();
-    const result = await fetchCallReadOnlyFunction({
+    const result = await callReadOnlyFunction({
       contractAddress: CONTRACT_ADDRESS,
       contractName: CONTRACT_NAME,
       functionName: "has-access",
@@ -170,7 +170,7 @@ export const hasAccess = async (
 export const getAuthorEbooks = async (authorAddress: string) => {
   try {
     const network = getNetwork();
-    const result = await fetchCallReadOnlyFunction({
+    const result = await callReadOnlyFunction({
       contractAddress: CONTRACT_ADDRESS,
       contractName: CONTRACT_NAME,
       functionName: "get-author-ebooks",
@@ -191,7 +191,7 @@ export const getAuthorEbooks = async (authorAddress: string) => {
 export const getBuyerEbooks = async (buyerAddress: string) => {
   try {
     const network = getNetwork();
-    const result = await fetchCallReadOnlyFunction({
+    const result = await callReadOnlyFunction({
       contractAddress: CONTRACT_ADDRESS,
       contractName: CONTRACT_NAME,
       functionName: "get-buyer-ebooks",
@@ -215,7 +215,7 @@ export const isAuthor = async (
 ): Promise<boolean> => {
   try {
     const network = getNetwork();
-    const result = await fetchCallReadOnlyFunction({
+    const result = await callReadOnlyFunction({
       contractAddress: CONTRACT_ADDRESS,
       contractName: CONTRACT_NAME,
       functionName: "is-author",
