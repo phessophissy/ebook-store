@@ -2,6 +2,7 @@
   "name": "ebook-store-frontend",
   "version": "1.0.0",
   "private": true,
+  "author": "Adekunle Bamz",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
